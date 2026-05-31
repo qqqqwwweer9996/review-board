@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* 키보드 사용자에게만 포커스 링을 표시한다. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
