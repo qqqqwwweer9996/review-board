@@ -14,8 +14,18 @@ export function ReviewCard({ review }: { review: Review }) {
   return (
     <Link
       href={`/reviews/${review.id}`}
-      className="block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-slate-200"
+      className="block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-slate-200"
     >
+      {review.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={review.image_url}
+          alt=""
+          className="h-40 w-full object-cover"
+          loading="lazy"
+        />
+      ) : null}
+      <div className={review.image_url ? "p-5 pt-4" : "p-5"}>
       <div className="mb-2 flex items-center gap-2">
         <StarRating rating={review.rating} size={16} />
         <span className="text-sm font-semibold text-amber-500">
@@ -34,6 +44,7 @@ export function ReviewCard({ review }: { review: Review }) {
         <span className="font-medium text-slate-500">{review.nickname}</span>
         <span aria-hidden="true">·</span>
         <span>{formatDate(review.created_at)}</span>
+      </div>
       </div>
     </Link>
   );

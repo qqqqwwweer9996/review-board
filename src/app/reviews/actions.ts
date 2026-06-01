@@ -1,17 +1,37 @@
 "use server";
+// 후기 CRUD Server Action 모음.
+//
+// 보안 모델(이중·삼중 방어):
+//   1) UI 가드   - 본인 글에만 수정/삭제 버튼 노출, 비로그인은 작성 진입 차단
+//   2) 쿼리 조건 - update/delete 시 .eq("user_id", user.id) 명시
+//   3) RLS       - DB 정책이 최종 차단 (UI/쿼리를 우회해도 막힘)
+// 클라이언트는 신뢰하지 않으며, 모든 입력을 서버에서 다시 검증한다.
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+// 폼 제출 결과를 클라이언트(ReviewForm)로 돌려주는 상태 타입.
+// error 가 있으면 폼에 메시지를 띄우고, 없으면(성공) 서버에서 redirect 한다.
 export type ReviewFormState = { error?: string };
 
 const TITLE_MAX = 100;
 const CONTENT_MAX = 2000;
 
+/** Supabase Storage 의 review-images public URL 만 허용한다. */
+function parseImageUrl(formData: FormData): string | null {
+  const raw = String(formData.get("image_url") ?? "").trim();
+  if (!raw) return null;
+  // 신뢰 경계: 우리 Storage 버킷 public 경로만 통과시킨다.
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const allowedPrefix = `${base}/storage/v1/object/public/review-images/`;
+  if (base && raw.startsWith(allowedPrefix)) return raw;
+  return null;
+}
+
 /** 폼 입력값을 검증해 정제된 값 또는 에러 메시지를 돌려준다. */
 function parseReviewForm(formData: FormData):
-  | { ok: true; title: string; content: string; rating: number }
+  | { ok: true; title: string; content: string; rating: number; imageUrl: string | null }
   | { ok: false; error: string } {
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
@@ -26,7 +46,7 @@ function parseReviewForm(formData: FormData):
   if (!Number.isInteger(rating) || rating < 1 || rating > 5)
     return { ok: false, error: "별점을 1~5 사이로 선택해 주세요." };
 
-  return { ok: true, title, content, rating };
+  return { ok: true, title, content, rating, imageUrl: parseImageUrl(formData) };
 }
 
 /** 가입 시 저장한 닉네임을 우선 사용하고, 없으면 이메일 앞부분으로 대체. */
@@ -40,7 +60,11 @@ function resolveNickname(user: {
   return fromEmail.slice(0, 20);
 }
 
-// 후기 작성
+/**
+ * 후기 작성.
+ * 로그인 확인 → 입력 검증 → insert → 작성된 글 상세로 이동.
+ * nickname 은 클라이언트 입력이 아니라 서버가 세션에서 직접 결정한다(위조 방지).
+ */
 export async function createReview(
   formData: FormData
 ): Promise<ReviewFormState> {
@@ -61,6 +85,7 @@ export async function createReview(
       title: parsed.title,
       content: parsed.content,
       rating: parsed.rating,
+      image_url: parsed.imageUrl,
     })
     .select("id")
     .single();
@@ -93,6 +118,7 @@ export async function updateReview(
       title: parsed.title,
       content: parsed.content,
       rating: parsed.rating,
+      image_url: parsed.imageUrl,
     })
     .eq("id", id)
     .eq("user_id", user.id); // UI 가드 + RLS 와 함께 삼중 방어

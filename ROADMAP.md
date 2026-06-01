@@ -92,6 +92,17 @@
 - [x] 모든 /reviews 참조 정리, 타입체크 0, 라우트 검증(home=200, mypage·reviews=307)
 - [x] 브라우저 스냅샷 확인: 홈에 기존 후기 카드 정상 렌더
 
+## 추가 기능 — 사진 업로드 (Supabase Storage)
+- [x] reviews.image_url 컬럼 추가 (마이그레이션 0002)
+- [x] Storage 버킷 review-images(public) + RLS(읽기 공개 / 본인 폴더만 업로드·삭제)
+- [x] ImageUploadField (클라 직접 업로드, 미리보기, 5MB·형식 검증, 제거 버튼)
+- [x] 작성/수정 폼에 통합 (image_url hidden input)
+- [x] 서버 액션: image_url 서버측 화이트리스트 검증 (우리 버킷 public URL만 허용)
+- [x] 카드 썸네일 + 상세 이미지 표시
+- [x] 타입체크 0, 프로덕션 빌드 통과
+- [ ] **(사용자 작업)** 마이그레이션 0002 SQL 실행 (Storage 버킷·정책 생성)
+- [ ] **(사용자 테스트)** 브라우저에서 사진 첨부 후기 작성
+
 ## Phase 6 — 배포
 - [ ] GitHub 리포 생성 + push
 - [ ] Vercel import

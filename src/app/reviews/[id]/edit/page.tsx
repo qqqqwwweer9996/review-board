@@ -45,6 +45,7 @@ export default async function EditReviewPage({
             title: review.title,
             content: review.content,
             rating: review.rating,
+            imageUrl: review.image_url,
           }}
         />
       </div>
