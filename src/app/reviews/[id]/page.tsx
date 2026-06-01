@@ -64,6 +64,15 @@ export default async function ReviewDetailPage({
 
         <hr className="my-6 border-slate-100" />
 
+        {review.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={review.image_url}
+            alt="후기 첨부 이미지"
+            className="mb-6 max-h-[28rem] w-full rounded-2xl object-cover"
+          />
+        ) : null}
+
         <p className="whitespace-pre-wrap leading-relaxed text-slate-700">
           {review.content}
         </p>

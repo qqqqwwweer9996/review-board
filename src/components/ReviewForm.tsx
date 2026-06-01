@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { StarRatingInput } from "./StarRatingInput";
+import { ImageUploadField } from "./ImageUploadField";
 import type { ReviewFormState } from "@/app/reviews/actions";
 
 type Action = (formData: FormData) => Promise<ReviewFormState>;
@@ -15,6 +16,7 @@ interface ReviewFormProps {
     title?: string;
     content?: string;
     rating?: number;
+    imageUrl?: string | null;
   };
   submitLabel?: string;
 }
@@ -78,6 +80,13 @@ export function ReviewForm({
           별점 <span className="text-indigo-600">*</span>
         </span>
         <StarRatingInput name="rating" defaultValue={defaultValues?.rating ?? 0} />
+      </div>
+
+      <div>
+        <span className="mb-1.5 block text-sm font-semibold text-slate-700">
+          사진
+        </span>
+        <ImageUploadField name="image_url" defaultUrl={defaultValues?.imageUrl} />
       </div>
 
       <div>

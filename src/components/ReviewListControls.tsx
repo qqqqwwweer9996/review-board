@@ -19,6 +19,7 @@ export function ReviewListControls() {
 
   const [query, setQuery] = useState(currentQuery);
 
+  // URL 이 바뀌면(뒤로가기/정렬 변경 등) 입력창 동기화
   useEffect(() => {
     setQuery(currentQuery);
   }, [currentQuery]);
@@ -35,9 +36,24 @@ export function ReviewListControls() {
     return qs ? `${pathname}?${qs}` : pathname;
   }
 
+  // 실시간 검색: 타이핑이 멈춘 뒤 300ms 후 URL 에 반영(디바운스).
+  // 글자마다 히스토리가 쌓이지 않도록 replace 사용.
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (trimmed === currentQuery) return; // 이미 반영됨 → 중복 내비게이션 방지
+
+    const timer = setTimeout(() => {
+      router.replace(buildUrl({ q: trimmed }), { scroll: false });
+    }, 300);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // Enter 제출 시 디바운스를 기다리지 않고 즉시 반영
   function onSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    router.push(buildUrl({ q: query.trim() }));
+    router.replace(buildUrl({ q: query.trim() }), { scroll: false });
   }
 
   function toggleSort(sort: SortOption) {
@@ -109,7 +125,7 @@ export function ReviewListControls() {
         {query && (
           <button
             type="button"
-            onClick={() => { setQuery(""); router.push(buildUrl({ q: "" })); }}
+            onClick={() => { setQuery(""); router.replace(buildUrl({ q: "" }), { scroll: false }); }}
             aria-label="검색어 지우기"
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600"
           >
