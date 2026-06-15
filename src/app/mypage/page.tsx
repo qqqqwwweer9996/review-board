@@ -32,7 +32,7 @@ export default async function MyPage() {
       : null;
 
   return (
-    <div className="px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       {/* 프로필 헤더 */}
       <div className="mb-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">마이페이지</h1>
@@ -70,7 +70,7 @@ export default async function MyPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}
